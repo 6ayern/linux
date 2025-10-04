@@ -1,17 +1,19 @@
-#include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-
-void debug(char line[100]){
+#include<readline/readline.h>
+void debug(char *line){
 printf("%s\n", line);
 }
-
 int main(){
-char input[100];
-while(1){
-	fgets(input, 100, stdin);
-	input[strlen(input) - 1] = '\0';
-	if(strcmp(input, "\\q") == 0) {
+char *input;
+while(true){
+	input = readline("$ ");
+	if(input == NULL || *input =='\0'){
+	free(input);
+	break;
+}
+	if(!strcmp(input, "\\q")) {
 		break;
 	}
 	else if(strncmp(input, "debug ", 5)==0) {
@@ -19,6 +21,8 @@ while(1){
 	} else{
  	printf("%s: command not found\n", input);
 	}
+free(input);
+}
  return 0;
 }
-}
+
