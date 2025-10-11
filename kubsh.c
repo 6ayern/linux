@@ -16,6 +16,16 @@ void sig_handler(int signum) {
  printf("Configuration reloaded");
 }
 
+void disk_info(char *device){
+ printf("Disk information for %s:\n", device);
+ char command[256];
+ snprintf(command, sizeof(command), "sudo fdisk -l %s 2>/dev/null", device);
+ int result = system(command);
+ if(result!=0) {
+  printf("Error: Cannot get disk information for %s\n", device);
+  printf("Try run ning with sudo or check device name\n");
+ }
+} 
 int main(){
  rl_clear_signals;
  signal(SIGINT, sig_handler);
@@ -37,7 +47,9 @@ int main(){
    }
    else if(strncmp(input, "debug ", 5)==0) {
     debug(input);
-    } else{
+    } else if(!strncmp(input, "\\l /dev/sda", 12)){
+     disk_info("/dev/sda");
+    } else {
      printf("%s: command not found\n", input);
      }
    free(input);
