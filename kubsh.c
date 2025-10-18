@@ -5,6 +5,8 @@
 #include<readline/history.h>
 #include<signal.h>
 #define HISTORY_FILE ".kubsh_history"
+#include<stdio.h>
+
 sig_atomic_t signal_received = 0;
 
 void debug(char *line){
@@ -25,7 +27,28 @@ void disk_info(char *device){
   printf("Error: Cannot get disk information for %s\n", device);
   printf("Try run ning with sudo or check device name\n");
  }
-} 
+}
+
+void print_env(char *var_name){
+ char *value = getenv (var_name);
+ if(value == NULL) {
+  printf("Env variable %s not found\n", var_name);
+  return;
+ }
+ printf("Env variable %s:\n", var_name);
+ char *copy = strdup(value);
+ if(copy==NULL){
+  printf("Memory allocation error\n");
+  return;
+ }
+ char *token = strtok(copy,":");
+ int count = 1;
+ while(token!=NULL){
+  printf("%d: %s\n", count++, token);
+  token=strtok(NULL, ":");
+ }
+ free(copy);
+}
 int main(){
  rl_clear_signals;
  signal(SIGINT, sig_handler);
@@ -49,12 +72,20 @@ int main(){
     debug(input);
     } else if(!strncmp(input, "\\l /dev/sda", 12)){
      disk_info("/dev/sda");
-    } else {
+    } else if (!strncmp(input, "\\e $", 4)){
+       char *var_name = input +4;
+       if(*var_name !='\0'){
+        print_env(var_name);
+       }else{
+        printf("Usage: \\e $VARIABLE_NAME\n");
+       }
+     }else {
      printf("%s: command not found\n", input);
-     }
+    }
    free(input);
    }
  write_history(HISTORY_FILE);
  return 0;
 }
+
 
