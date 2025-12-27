@@ -1,5 +1,16 @@
 docker run -it   --cap-add SYS_ADMIN   --cap-add KILL   --device /dev/fuse   --security-opt apparmor:unconfined   -v $(pwd):/mnt   tyvik/kubsh_test:master
 
+sudo docker run --privileged --device /dev/fuse \
+  -v $(pwd):/mnt tyvik/kubsh_test:master bash -c "
+    cd /mnt &&
+    make clean && make all &&
+    cp kubsh /usr/local/bin/kubsh &&
+    chmod +x /usr/local/bin/kubsh &&
+    cd /opt &&
+    modprobe fuse 2>/dev/null || true &&
+    python3 -m pytest test_basic.py test_vfs.py -v
+"
+
 sudo apt update
 sudo apt install curl software-properties-common ca-certificates apt-transport-https -y
 wget -O- https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor | sudo tee /etc/apt/keyrings/docker.gpg > /dev/null
